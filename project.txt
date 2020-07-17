@@ -1,0 +1,9 @@
+parse json with python - reads the dialouge box and runs it through spellcheck
+
+
+-New plan: custom parser for noppes's bs
+write json parser class that can use relaxedjson, actual json and whatever the fuck noppes is using
+
+THEN do spell checking
+
+ffs it's almost easier to just to manually check the files
