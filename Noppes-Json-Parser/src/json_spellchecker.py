@@ -32,6 +32,7 @@ def readFile():
        if debug:
        	print("-------DEBUG-------\n" + s)
        s = s.split()
+
 def writeFile():
 	global wordsToWrite
 	global reccomendedFix
@@ -43,10 +44,13 @@ def writeFile():
 				file.write("\n--------Misspelled words for" + sys.argv[1] + "--------\n")
 				i = 0
 				for i in range(0, len(wordsToWrite)):
-					file.write(wordsToWrite[i] + " at " +  str(positionOfWords[i]) +"\n\n")
-					file.write("Reccomended fix:" + reccomendedFix[i] + "\n")
+					file.write(wordsToWrite[i] + " at " +  str(positionOfWords[i]) +"\n")
+					tmps = ""
+					for w in reccomendedFix[i]:
+						tmps += w + " , "
+					file.write("Reccomended fix:" + tmps + "\n\n")
 	else:
-		with open("tmp.txt", "w") as f:
+		with open(sys.argv[1], "w") as f:
 			f.write(" ".join(s))
 			if(debug):
 				print("-------DEBUG-------\n" + " ".join(s))
@@ -58,13 +62,14 @@ def spellcheck():
 	global s
     
 	spell = SpellChecker()
+	unknown  = spell.unknown(s)
 	c = 0
-	for word in s:
-		if word not in spell and word != "\n" and word != "----":
+	for word in unknown:
+		if word != "\n" and word != "----":
 			if not "-r" in sys.argv:
 				wordsToWrite.append(word)
 				positionOfWords.append(c)
-				reccomendedFix.append(spell.correction(word))
+				reccomendedFix.append(spell.candidates(word))
 			else:
 				s.insert(c, spell.correction(word))
 				s.remove(word)
