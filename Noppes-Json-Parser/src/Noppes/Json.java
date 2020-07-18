@@ -12,7 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
+/**
+ * Code copied from https://github.com/Noppes/DialogEditor to work with CustomNPCs JSON files, 
+ * since all files are not JSON standard-compliant.
+ * @author Noppes
+ *
+ */
 public abstract class Json {
 	public static final int STRING = 0;
 	public static final int INTEGER = 1;
