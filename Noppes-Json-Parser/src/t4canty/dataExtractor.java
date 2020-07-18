@@ -18,11 +18,14 @@ import Noppes.Json.JsonException;
 
 public class dataExtractor {
 	private Json j;
-	private String dailougeText;
-	private ArrayList<Json> dialougeOptions;
+	public String dailougeText;
+	public ArrayList<Json> dialougeOptions;
 	private ArrayList<String> dialougeOptionTitles;
 	private String questText;
 	private String questComplete;
+	private ArrayList<String> Corrections = new ArrayList<String>();
+	private ArrayList<String> misspelledWords = new ArrayList<String>();
+	private ArrayList<Integer> wordPositions = new ArrayList<Integer>();
 	private static boolean isQuest = false;
 	public dataExtractor(File f, boolean isQuest) throws IOException, JsonException, InterruptedException {
 		j = new Json.JsonMap().Load(f);
@@ -34,17 +37,29 @@ public class dataExtractor {
 		readKeys();
 		writeTempKeys();
 		readTempkeys();
-		
-		if(isQuest) {
-			System.out.println("Returned Quest Text:" + questText);
-			System.out.println("Returned Complete Text:" + questComplete);
-		}else {
-			System.out.println("Returned Dialouge Text:" + dailougeText);
-			System.out.println("Returned Dialouge Titles:");
-			for(String s : dialougeOptionTitles) {
-				System.out.println(s);
-			}
+		System.out.println("Misspelled words");
+		for(String s : misspelledWords) {
+			System.out.println(s);
 		}
+		
+		System.out.println("Word Positions");
+		for(int i : wordPositions) {
+			System.out.println(i);
+		}
+		System.out.println("Word corrections");
+		for(String s2 : Corrections) {
+			System.out.println(s2);
+		}
+//		if(isQuest) {
+//			System.out.println("Returned Quest Text:" + questText);
+//			System.out.println("Returned Complete Text:" + questComplete);
+//		}else {
+//			System.out.println("Returned Dialouge Text:" + dailougeText);
+//			System.out.println("Returned Dialouge Titles:");
+//			for(String s : dialougeOptionTitles) {
+//				System.out.println(s);
+//			}
+//		}
 		//writeKeys();
 	}
 
@@ -99,25 +114,52 @@ public class dataExtractor {
 		}
 
 		assert p.waitFor() == 0 : "Error - python returned with error code.";
-
+		
 		String pOutput = "";
-		BufferedReader b2f = new BufferedReader(new FileReader(new File("/home/tom/git/json-checker/tmp.txt")));
+		line = "";
+		BufferedReader b2f = new BufferedReader(new FileReader(new File(path + "/correctionsFile.txt")));
+		while((line = b2f.readLine()) != null) {
+			pOutput += line + " ";
+		}
+		b2f.close();
+		StringTokenizer st = new StringTokenizer(pOutput, "----");
+		while(st.hasMoreTokens()) {
+			Corrections.add(st.nextToken().trim());
+		}
+
+		pOutput = readIndividualKey(new File(path + "/misspelledWords.txt"));
+		st = new StringTokenizer(pOutput, "----");
+		while(st.hasMoreTokens()) {
+			misspelledWords.add(st.nextToken());
+		}
+		
+		pOutput = readIndividualKey(new File(path + "/wordPosition.txt"));
+		st = new StringTokenizer(pOutput, "----");
+		while(st.hasMoreTokens()) {
+			wordPositions.add(Integer.parseInt(st.nextToken()));
+		}
+
+//		if(isQuest) {
+//			questText = st.nextToken();
+//			questComplete = st.nextToken();
+//		}else {
+//			dailougeText = st.nextToken();
+//			while(st.hasMoreTokens()) {
+//				dialougeOptionTitles.add(st.nextToken());
+//			}
+//		}
+	}
+	private String readIndividualKey(File f) throws IOException {
+		String pOutput = "";
+		String line = "";
+		BufferedReader b2f = new BufferedReader(new FileReader(f));
 		while((line = b2f.readLine()) != null) {
 			pOutput += line;
 		}
-
-		StringTokenizer st = new StringTokenizer(pOutput, "----");
-
-		if(isQuest) {
-			questText = st.nextToken();
-			questComplete = st.nextToken();
-		}else {
-			dailougeText = st.nextToken();
-			while(st.hasMoreTokens()) {
-				dialougeOptionTitles.add(st.nextToken());
-			}
-		}
+		b2f.close();
+		return pOutput;
 	}
+
 //	public static void main(String args[]) {
 //		if(args.length == 0) {
 //			System.err.println("Error: Not enough Arguments");
@@ -139,4 +181,13 @@ public class dataExtractor {
 //			e.printStackTrace();
 //		}
 //	}
+	public ArrayList<String> getCorrections(){
+		return Corrections;
+	}
+	public ArrayList<Integer> getWordPositions(){
+		return wordPositions;
+	}
+	public ArrayList<String> getWords(){
+		return misspelledWords;
+	}
 }
