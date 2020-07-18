@@ -2,11 +2,13 @@ from spellchecker import SpellChecker
 import sys
 import spellchecker
 from string import punctuation
+from html5lib._ihatexml import letter
 
 wordsToWrite = []
 positionOfWords = []
 reccomendedFix = []
 s = ""
+punctuationObjects = []
 
 debug = False
 
@@ -74,26 +76,19 @@ def spellcheck():
 	c = 0
 	for word in s:
 		if word != "\n" and word != "----":
-			firstChar = ""
-			lastChar = ""
-			if word[0] in punctuation:
-				firstChar = word[0]
-				word = word[1:len(word)]
-			if word[len(word)-1] in punctuation:
-				lastChar = word[len(word)-1]
-				word = word[0:len(word)-1]
-		
-			if word not in spell:
+			word = removePunctuation(list(word))
+			
+			if word not in spell and len(word) != 0:
+				word = addPunctuation(list(word))
 				needToFormat = False
 				if(word[0].isupper()):
 					needToFormat = True
 				
-				wordsToWrite.append(firstChar + word + lastChar)
+				wordsToWrite.append(word)
 				positionOfWords.append(c)
 				
 				SubFix = []
 				for sbs in spell.candidates(word):
-					sbs = firstChar + sbs + lastChar
 					if needToFormat:
 						SubFix.append(MakeUpper(list(sbs)))
 					else:
@@ -126,5 +121,27 @@ def MakeUpper(s):
 	s[0].upper();
 	return "".join(s)
 
+def removePunctuation(s):
+	punctuationObjects.clear()
+	for i in range(0, len(s)):
+		print("Checking letter" + str(i) + "/" + str(len(s)) + " : " + s[i])
+		if s[i] in punctuation:
+			print("Found letter:" + s[i])
+			punctuationObjects.append(punctuationObject(s[i], i)) 
 	
+	for p in punctuationObjects:
+		s.remove(p.punctuationLetter)
+	s = "".join(s)
+	print("DEBUG: Removed String:" + s)
+	return s
+def addPunctuation(s):
+	for i in punctuationObjects:
+		s.insert(i.position, i.punctuationLetter)
+	s = "".join(s)
+	return s
+	
+class punctuationObject:
+	def __init__(self, punctuationLetter, position):
+		self.punctuationLetter = punctuationLetter
+		self.position = position
 main()
