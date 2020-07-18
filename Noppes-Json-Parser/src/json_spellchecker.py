@@ -2,7 +2,6 @@ from spellchecker import SpellChecker
 import sys
 import spellchecker
 from string import punctuation
-from html5lib._ihatexml import letter
 
 wordsToWrite = []
 positionOfWords = []
