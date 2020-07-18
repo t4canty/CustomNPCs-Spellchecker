@@ -1,6 +1,7 @@
 from spellchecker import SpellChecker
 import sys
 import spellchecker
+from string import punctuation
 
 wordsToWrite = []
 positionOfWords = []
@@ -15,7 +16,7 @@ def main():
 		print("Usage: spellchecker.py <file> \n NOTE: this tool is not meant to be used by itself - try using json-parser.jar instead.")
 		sys.exit(-1)
 	if "-h" in sys.argv:
-		print("Usage: spellchecker.py <file> [-r]\n NOTE: this tool is not meant to be used by itself - try using json-parser.jar instead.")
+		print("Usage: spellchecker.py <file> [\n NOTE: this tool is not meant to be used by itself - try using json-parser.jar instead.")
 		sys.exit(0)
 	if "-d" in sys.argv:
 		debug = True
@@ -25,6 +26,7 @@ def main():
 	writeFile()
     
 def readFile():
+    print("DEBUG: READING FILE")
     global s
     global debug
     with open(sys.argv[1]) as f:
@@ -34,10 +36,13 @@ def readFile():
        s = s.split()
 
 def writeFile():
+	print("DEBUG: WRITING FILE")
 	global wordsToWrite
 	global reccomendedFix
 	global positionOfWords
 	global s	
+	
+	print("DEBUG: WORDSTOWRITE:" + " , ".join(wordsToWrite))
 	
 	if not len(wordsToWrite) == 0:
 		posFile = open("wordPosition.txt", "w")
@@ -56,7 +61,9 @@ def writeFile():
 		posFile.close()
 		CorrectionsFile.close()
 		mispelledWordsFile.close()
+
 def spellcheck():
+	print("DEBUG:SPELLCHECKING FILE")
 	global wordsToWrite
 	global reccomendedFix
 	global positionOfWords
@@ -64,12 +71,60 @@ def spellcheck():
 	global s
     
 	spell = SpellChecker()
-	unknown  = spell.unknown(s)
 	c = 0
-	for word in unknown:
+	for word in s:
 		if word != "\n" and word != "----":
-			wordsToWrite.append(word)
-			positionOfWords.append(c)
-			reccomendedFix.append(spell.candidates(word))
-		c += 1
+			firstChar = ""
+			lastChar = ""
+			if word[0] in punctuation:
+				firstChar = word[0]
+				word = word[1:len(word)]
+			if word[len(word)-1] in punctuation:
+				lastChar = word[len(word)-1]
+				word = word[0:len(word)-1]
+		
+			if word not in spell:
+				needToFormat = False
+				if(word[0].isupper()):
+					needToFormat = True
+				
+				wordsToWrite.append(firstChar + word + lastChar)
+				positionOfWords.append(c)
+				
+				SubFix = []
+				for sbs in spell.candidates(word):
+					sbs = firstChar + sbs + lastChar
+					if needToFormat:
+						SubFix.append(MakeUpper(list(sbs)))
+					else:
+						SubFix.append(sbs)
+				
+				reccomendedFix.append(SubFix)
+			c += len(word)
+
+def getStringFormat(s):
+	cases = []
+	for substring in s:
+		if substring.islower():
+			cases.append(0)
+		else:
+			cases.append(1)
+	return cases
+
+def formatString(s, cases):
+	modS = ""
+	i = 0
+	for i in range(0, len(cases)):
+		if cases[i] == 0:
+			modS += s[i].lower();
+		else:
+			modS +=  s[i].upper();
+		i += 1
+	return modS
+	
+def MakeUpper(s):
+	s[0].upper();
+	return "".join(s)
+
+	
 main()

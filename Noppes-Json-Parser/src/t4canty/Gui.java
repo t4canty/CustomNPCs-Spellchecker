@@ -66,6 +66,9 @@ public class Gui extends JPanel implements ActionListener{
 				else currentIndexOfWord = 0;
 				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
 				addButtons(currentIndexOfWord);
+				
+				
+				
 			}
 		});
 		
