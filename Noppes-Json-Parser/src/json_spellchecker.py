@@ -27,23 +27,24 @@ def main():
 	writeFile()
     
 def readFile():
-    print("DEBUG: READING FILE")
     global s
     global debug
+    if debug: print("DEBUG: READING FILE")
     with open(sys.argv[1]) as f:
        s = f.read()
-       if debug:
-       	print("-------DEBUG-------\n" + s)
+       if debug: print("-------DEBUG-------\n" + s)
        s = s.split()
 
 def writeFile():
-	print("DEBUG: WRITING FILE")
+	global debug
 	global wordsToWrite
 	global reccomendedFix
 	global positionOfWords
 	global s	
 	
-	print("DEBUG: WORDSTOWRITE:" + " , ".join(wordsToWrite))
+	if debug: 
+		print("DEBUG: WRITING FILE")
+		print("DEBUG: WORDSTOWRITE:" + ", ".join(wordsToWrite))
 	
 	if not len(wordsToWrite) == 0:
 		posFile = open("wordPosition.txt", "w")
@@ -64,12 +65,13 @@ def writeFile():
 		mispelledWordsFile.close()
 
 def spellcheck():
-	print("DEBUG:SPELLCHECKING FILE")
 	global wordsToWrite
 	global reccomendedFix
 	global positionOfWords
 	global autoCorrected
 	global s
+	global debug
+	if debug: print("DEBUG:SPELLCHECKING FILE")
     
 	spell = SpellChecker()
 	c = 0
@@ -122,17 +124,18 @@ def MakeUpper(s):
 	return "".join(s)
 
 def removePunctuation(s):
+	global debug
 	punctuationObjects.clear()
 	for i in range(0, len(s)):
-		print("Checking letter" + str(i) + "/" + str(len(s)) + " : " + s[i])
+		if debug :print("Checking letter" + str(i) + "/" + str(len(s)) + " : " + s[i])
 		if s[i] in punctuation:
-			print("Found letter:" + s[i])
+			if debug: print("Found letter:" + s[i])
 			punctuationObjects.append(punctuationObject(s[i], i)) 
 	
 	for p in punctuationObjects:
 		s.remove(p.punctuationLetter)
 	s = "".join(s)
-	print("DEBUG: Removed String:" + s)
+	if debug: print("DEBUG: Removed String:" + s)
 	return s
 def addPunctuation(s):
 	for i in punctuationObjects:
