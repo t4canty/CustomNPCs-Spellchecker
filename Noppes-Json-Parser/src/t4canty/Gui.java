@@ -34,6 +34,13 @@ public class Gui extends JPanel implements ActionListener{
 	private dataExtractor dataE;
 	private JPanel autoCorrectButtonPanel;
 	private JTextArea jText;
+	private JButton prevButton;
+	private JButton saveButton;
+	private JButton nextFile;
+	private JButton prevFile;
+	private JLabel numFilesLeft;
+	private int currentFileNum = 1;
+	private static int numFiles;
 	
 	public Gui(File file) throws IOException, JsonException, InterruptedException {
 		f = new JFrame();
@@ -49,7 +56,11 @@ public class Gui extends JPanel implements ActionListener{
 		JPanel buttonsAndStuffPanel = new JPanel();
 		nextButton = new JButton("next");
 		autocorrectButton = new JButton("edit");
-		JLabel numFilesLeft = new JLabel("Null");
+		prevButton = new JButton("previous");
+		saveButton = new JButton("save");
+		numFilesLeft = new JLabel("Null");
+		nextFile = new JButton("Next File");;
+		prevFile = new JButton("Previous File");
 		
 		autoCorrectButtonPanel = new JPanel();
 		addButtons(currentIndexOfWord);
@@ -89,9 +100,13 @@ public class Gui extends JPanel implements ActionListener{
 		buttonsAndStuffPanel.setLayout(new BorderLayout());
 		
 		JPanel nextButtons = new JPanel();
-		nextButtons.setLayout(new GridLayout(2, 1));
+		nextButtons.setLayout(new GridLayout(3, 2));
 		nextButtons.add(nextButton);
 		nextButtons.add(autocorrectButton);
+		nextButtons.add(prevButton);
+		nextButtons.add(saveButton);
+		nextButtons.add(nextFile);
+		nextButtons.add(prevFile);
 		
 		buttonsAndStuffPanel.add(nextButtons, BorderLayout.PAGE_START);
 		buttonsAndStuffPanel.add(buttonScroll, BorderLayout.CENTER);
@@ -111,14 +126,19 @@ public class Gui extends JPanel implements ActionListener{
 		t.start();
 	}
 	public static void main(String args[]) {
+		numFiles = args.length;
+		
 		try {
-		new Gui(new File(args[0]));
+		Gui g = new Gui(new File(args[0]));
+		g.numFilesLeft.setText(g.currentFileNum + "/" + numFiles);
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
+		if(currentFileNum == 1) prevFile.setEnabled(false);
+		if(currentFileNum == numFiles) nextFile.setEnabled(false);
 	}
 	
 	private void addButtons(int index) {
@@ -133,7 +153,7 @@ public class Gui extends JPanel implements ActionListener{
 			final String jbString = jb.getText();
 			jb.addActionListener(new ActionListener() {
 				
-				//@Override
+				@Override
 				public void actionPerformed(ActionEvent arg0) {					
 					jText.setText(dataE.dailougeText);
 					currentMisspelledWord.setText(jbString);
