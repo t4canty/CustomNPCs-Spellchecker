@@ -66,9 +66,6 @@ public class Gui extends JPanel implements ActionListener{
 				else currentIndexOfWord = 0;
 				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
 				addButtons(currentIndexOfWord);
-				
-				
-				
 			}
 		});
 		
@@ -78,7 +75,7 @@ public class Gui extends JPanel implements ActionListener{
 		
 		
 		jText = new JTextArea(10, 10);
-		jText.setText("Dialouge Text: \n" + dataE.dailougeText + "\n Dialouge Options: \n");
+		jText.setText(dataE.dailougeText);
 		jText.setEditable(false);
 		jText.setLineWrap(true);
 		jText.setWrapStyleWord(true);
@@ -125,8 +122,6 @@ public class Gui extends JPanel implements ActionListener{
 	}
 	
 	private void addButtons(int index) {
-		System.out.println("Gui.addButtons()");
-		
 		for(Component c : autoCorrectButtonPanel.getComponents()) {
 			autoCorrectButtonPanel.remove(c);
 		}
@@ -134,14 +129,19 @@ public class Gui extends JPanel implements ActionListener{
 		StringTokenizer st = new StringTokenizer(dataE.getCorrections().get(index), " ");
 		autoCorrectButtonPanel.setLayout(new GridLayout(st.countTokens(), 1));
 		while(st.hasMoreTokens()) {
-			System.out.println("adding buttons");
 			JRadioButton jb = new JRadioButton(st.nextToken());
 			final String jbString = jb.getText();
 			jb.addActionListener(new ActionListener() {
 				
 				//@Override
-				public void actionPerformed(ActionEvent arg0) {
+				public void actionPerformed(ActionEvent arg0) {					
+					jText.setText(dataE.dailougeText);
 					currentMisspelledWord.setText(jbString);
+					String replacedText = jText.getText().substring(0, 
+							dataE.getWordPositions().get(currentIndexOfWord)) + jbString 
+							+ jText.getText().substring(
+									dataE.getWordPositions().get(currentIndexOfWord) + dataE.getWords().get(currentIndexOfWord).length());
+					jText.setText(replacedText);
 				}
 			});
 			autocorrectOptions.add(jb);

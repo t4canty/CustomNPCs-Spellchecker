@@ -75,6 +75,7 @@ def spellcheck():
 	c = 0
 	for word in s:
 		if word != "\n" and word != "----":
+			wordLength = len(word)
 			word = removePunctuation(list(word))
 			
 			if word not in spell and len(word) != 0:
@@ -94,7 +95,7 @@ def spellcheck():
 						SubFix.append(sbs)
 				
 				reccomendedFix.append(SubFix)
-			c += len(word)
+			c += wordLength + 1
 
 def getStringFormat(s):
 	cases = []
