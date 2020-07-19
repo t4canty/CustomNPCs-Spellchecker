@@ -85,14 +85,14 @@ public class Gui extends JPanel implements ActionListener{
 		currentMisspelledWord = new JTextField( dataE.getWords().get(currentIndexOfWord));
 		numFilesLeft = new JLabel();
 		
+		viewOptions = new JButton("Options");
+		viewCompletedText = new JButton("Completed Text");
 		nextButton = new JButton("next");
 		autocorrectButton = new JButton("edit");
 		prevButton = new JButton("previous");
 		saveButton = new JButton("save");
 		nextFile = new JButton("Next File");;
 		prevFile = new JButton("Previous File");
-		viewOptions = new JButton("View Dialouge Options");
-		viewCompletedText = new JButton("View Completed Quest Text");
 		
 		autoCorrectButtonPanel = new JPanel();
 		
@@ -135,13 +135,15 @@ public class Gui extends JPanel implements ActionListener{
 
 		
 		
-		nextButtons.setLayout(new GridLayout(3, 2));
+		nextButtons.setLayout(new GridLayout(4, 2));
 		nextButtons.add(nextButton);
 		nextButtons.add(autocorrectButton);
 		nextButtons.add(prevButton);
 		nextButtons.add(saveButton);
 		nextButtons.add(nextFile);
 		nextButtons.add(prevFile);
+		nextButtons.add(viewOptions);
+		nextButtons.add(viewCompletedText);
 		
 		buttonsAndStuffPanel.setLayout(new BorderLayout());
 		buttonsAndStuffPanel.add(nextButtons, BorderLayout.PAGE_START);
@@ -194,6 +196,9 @@ public class Gui extends JPanel implements ActionListener{
 		try {
 		Gui g = new Gui(new File(args[0]));
 		g.numFilesLeft.setText(g.currentFileNum + "/" + numFiles);
+		
+		if(isQuest) g.viewOptions.setEnabled(false);
+		else g.viewCompletedText.setEnabled(false);
 		}catch (Exception e) {
 			e.printStackTrace();
 		}

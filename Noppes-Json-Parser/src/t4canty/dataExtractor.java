@@ -130,10 +130,16 @@ public class dataExtractor {
 	 * Not done yet - don't use
 	 * @throws IOException
 	 */
-	public void writeKeys() throws IOException {
-		//TODO Finish method, and make more scalable.
-		j.put("DialogText", "test");
-		j.save(new File(path +"/83_mod.json"));
+	public void writeKeys(String dialougeText, ArrayList<String> DialougeOptions, File f) throws IOException {
+		j.put("DialogText", dialougeText);
+		int c = 0;
+//		Json tmp = j.get("Options");
+//		for (Json t : tmp.getList()) {
+//			Json t2 = t.get("Option");
+//			t2.put("Title", dialougeOptions.get(0));
+//			
+//		}
+		j.save(f);
 	}
 
 	//====Private Methods==//
