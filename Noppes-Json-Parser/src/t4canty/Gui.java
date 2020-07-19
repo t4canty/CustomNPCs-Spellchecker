@@ -80,6 +80,17 @@ public class Gui extends JPanel implements ActionListener{
 			}
 		});
 		
+		prevButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(currentIndexOfWord > 0) currentIndexOfWord--;
+				else currentIndexOfWord = dataE.getWords().size() -1;
+				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
+				addButtons(currentIndexOfWord);
+			}
+		});
+		
 		JScrollPane buttonScroller = new JScrollPane(autocorrectButton);
 		buttonScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
