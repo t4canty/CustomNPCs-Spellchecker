@@ -27,6 +27,7 @@ public class dataExtractor {
 	private ArrayList<String> misspelledWords = new ArrayList<String>();
 	private ArrayList<Integer> wordPositions = new ArrayList<Integer>();
 	private static boolean isQuest = false;
+	private String path = Paths.get(".").toAbsolutePath().normalize().toString();
 	public dataExtractor(File f, boolean isQuest) throws IOException, JsonException, InterruptedException {
 		j = new Json.JsonMap().Load(f);
 		this.isQuest = isQuest;
@@ -79,18 +80,18 @@ public class dataExtractor {
 	}
 	public void writeKeys() throws IOException {
 		j.put("DialogText", "test");
-		j.save(new File("/home/tom/git/json-checker/83_mod.json"));
+		j.save(new File(path +"/83_mod.json"));
 	}
 	private void writeTempKeys() throws IOException{
 		if(isQuest) {
-			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("/home/tom/git/json-checker/tmp.txt")), StandardCharsets.UTF_8);
+			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/tmp.txt")), StandardCharsets.UTF_8);
 			writer.write(questText + "\n");
 			writer.write("----\n");
 			writer.write(questComplete);
 			writer.close();
 		}
 		else {
-			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File("/home/tom/git/json-checker/tmp.txt")), StandardCharsets.UTF_8);
+			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/tmp.txt")), StandardCharsets.UTF_8);
 			writer.write(dailougeText + "\n");
 			writer.write("----\n");
 			for(Json j : dialougeOptions) {
@@ -101,8 +102,8 @@ public class dataExtractor {
 		}
 	}
 	private void readTempkeys() throws IOException, InterruptedException {
-		String path = Paths.get(".").toAbsolutePath().normalize().toString();
-		ProcessBuilder pb = new ProcessBuilder("python3", path + "//src//json_spellchecker.py", "/home/tom/git/json-checker/tmp.txt", "-d");
+		
+		ProcessBuilder pb = new ProcessBuilder("python3", path + "//src//json_spellchecker.py", path +"/tmp.txt", "-d");
 		pb.redirectErrorStream(true);
 
 		Process p = pb.start();

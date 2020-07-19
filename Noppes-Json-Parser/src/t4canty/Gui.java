@@ -1,8 +1,8 @@
 package t4canty;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -48,9 +49,9 @@ public class Gui extends JPanel implements ActionListener{
 		JPanel buttonsAndStuffPanel = new JPanel();
 		nextButton = new JButton("next");
 		autocorrectButton = new JButton("edit");
-		JTextArea numFilesLeft = new JTextArea("Null");
+		JLabel numFilesLeft = new JLabel("Null");
 		
-		
+		autoCorrectButtonPanel = new JPanel();
 		addButtons(currentIndexOfWord);
 		
 		autocorrectButton.addActionListener(new ActionListener() {
@@ -61,18 +62,17 @@ public class Gui extends JPanel implements ActionListener{
 		nextButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(currentIndexOfWord < dataE.getWords().size()) currentIndexOfWord++;
+				if(currentIndexOfWord < dataE.getWords().size() -1) currentIndexOfWord++;
 				else currentIndexOfWord = 0;
-				autoCorrectButtonPanel = null;
-//				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
-//				addButtons(currentIndexOfWord);
-//				buttonsAndStuffPanel.revalidate();
+				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
+				addButtons(currentIndexOfWord);
 			}
 		});
 		
 		JScrollPane buttonScroller = new JScrollPane(autocorrectButton);
 		buttonScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
+		
 		
 		jText = new JTextArea(10, 10);
 		jText.setText("Dialouge Text: \n" + dataE.dailougeText + "\n Dialouge Options: \n");
@@ -119,34 +119,31 @@ public class Gui extends JPanel implements ActionListener{
 	}
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		if(currentIndexOfWord >= dataE.getWords().size()) currentIndexOfWord = 0;
-	}
-	
-	@Override
-	public void paint(Graphics arg0) {
-		autoCorrectButtonPanel.revalidate();
-		System.out.println("motherfucker");
-		super.paint(arg0);
 	}
 	
 	private void addButtons(int index) {
 		System.out.println("Gui.addButtons()");
-		autoCorrectButtonPanel = new JPanel();
+		
+		for(Component c : autoCorrectButtonPanel.getComponents()) {
+			autoCorrectButtonPanel.remove(c);
+		}
 		autocorrectOptions = new ButtonGroup();
 		StringTokenizer st = new StringTokenizer(dataE.getCorrections().get(index), " ");
 		autoCorrectButtonPanel.setLayout(new GridLayout(st.countTokens(), 1));
 		while(st.hasMoreTokens()) {
 			System.out.println("adding buttons");
 			JRadioButton jb = new JRadioButton(st.nextToken());
+			final String jbString = jb.getText();
 			jb.addActionListener(new ActionListener() {
 				
-				@Override
+				//@Override
 				public void actionPerformed(ActionEvent arg0) {
-					currentMisspelledWord.setText(jb.getText());
+					currentMisspelledWord.setText(jbString);
 				}
 			});
 			autocorrectOptions.add(jb);
 			autoCorrectButtonPanel.add(jb);
+			autoCorrectButtonPanel.revalidate();
 		}
 	}
 }
