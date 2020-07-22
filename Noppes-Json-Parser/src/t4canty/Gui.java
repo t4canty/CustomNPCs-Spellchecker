@@ -36,7 +36,8 @@ public class Gui extends JPanel implements ActionListener{
 	private static boolean isQuest = false;
 	private int currentIndexOfWord = 0 ;
 	private int currentFileNum = 1;
-	private static int numFiles;
+	private int optionsIndex = 0;
+	private boolean isOptions = false;
 	private ButtonGroup autocorrectOptions;
 	private JButton autocorrectButton;
 	private JButton nextButton;
@@ -46,11 +47,14 @@ public class Gui extends JPanel implements ActionListener{
 	private JButton saveButton;
 	private JButton nextFile;
 	private JButton prevFile;
+	private JButton reset;
 	private JFrame f;
 	private JTextField currentMisspelledWord;
 	private JPanel autoCorrectButtonPanel;
+	private JPanel optionsPanel;
 	private JTextArea jText;
 	private JLabel numFilesLeft;
+	private JScrollPane jScroll;
 	private static ArrayList<File> fileList;
 	private dataExtractor dataE;
 	/**
@@ -66,25 +70,26 @@ public class Gui extends JPanel implements ActionListener{
 		f.setTitle("CustomNPCs spellchecker");
 		f.setSize(new Dimension(800, 559));
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		this.setLayout(new BorderLayout());
-		
+
 		dataE = new dataExtractor(file, isQuest, debug);
 		//setDoubleBuffered(false);
-		
+
 		//==Setting up components==//
 		JPanel buttonsAndStuffPanel = new JPanel();
 		JPanel nextButtons = new JPanel();
-		
+		optionsPanel = new JPanel();
+
 		jText = new JTextArea(10, 10);
 		jText.setText(dataE.getDialougeText());
 		jText.setEditable(false);
 		jText.setLineWrap(true);
 		jText.setWrapStyleWord(true);
-		
+
 		currentMisspelledWord = new JTextField( dataE.getWords().get(currentIndexOfWord));
 		numFilesLeft = new JLabel();
-		
+
 		viewOptions = new JButton("Options");
 		viewCompletedText = new JButton("Completed Text");
 		nextButton = new JButton("next");
@@ -93,49 +98,75 @@ public class Gui extends JPanel implements ActionListener{
 		saveButton = new JButton("save");
 		nextFile = new JButton("Next File");;
 		prevFile = new JButton("Previous File");
-		
+		reset = new JButton("Reset");
+
 		autoCorrectButtonPanel = new JPanel();
-		
-		JScrollPane jScroll = new JScrollPane(jText);
+
+		jScroll = new JScrollPane(jText);
 		JScrollPane buttonScroll = new JScrollPane(autoCorrectButtonPanel);
-		
-		addButtons(currentIndexOfWord); //adds correction suggestions on the side menu.
-		
+
+		addOptions(optionsPanel);
+		addButtons(currentIndexOfWord, false); //adds correction suggestions on the side menu.
+
 		//==Setting up ActionListeners==//
 		autocorrectButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {jText.setEditable(!jText.isEditable());}
 		});
-		
+
 		nextButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(currentIndexOfWord < dataE.getWords().size() -1) currentIndexOfWord++;
-				else currentIndexOfWord = 0;
-				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
-				addButtons(currentIndexOfWord);
+				if(isOptions) {
+					if(optionsIndex < dataE.getOptionMisspelledWords().size() -1) optionsIndex++;
+					else optionsIndex = 0;
+					currentMisspelledWord.setText(dataE.getDialougeOptionTitles().get(optionsIndex));
+					addButtons(optionsIndex, true);
+				}
+				else{
+					if(currentIndexOfWord < dataE.getWords().size() -1) currentIndexOfWord++;
+					else currentIndexOfWord = 0;
+					currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
+					addButtons(currentIndexOfWord, false);
+				}
 			}
 		});
-		
+
 		prevButton.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if(currentIndexOfWord > 0) currentIndexOfWord--;
 				else currentIndexOfWord = dataE.getWords().size() -1;
 				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
-				addButtons(currentIndexOfWord);
+				addButtons(currentIndexOfWord, false);
 			}
 		});
+
+		viewOptions.addActionListener(this);
+		viewOptions.setActionCommand("options");
+
+		if(isQuest) { 
+			viewOptions.setEnabled(false);
+			if(dataE.getOptionMisspelledWords().size() == 0) {
+				viewCompletedText.setEnabled(false);
+			}
+		}
+		else{
+			viewCompletedText.setEnabled(false);
+			if(dataE.getOptionMisspelledWords().size() == 0) {
+				viewOptions.setEnabled(false);
+			}
+		}
 		
 		//==Setting up component options==//
 		jScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		jScroll.setPreferredSize(new Dimension(500, 500));
 		buttonScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-		
-		
-		nextButtons.setLayout(new GridLayout(4, 2));
+
+
+		nextButtons.setLayout(new GridLayout(5, 2));
 		nextButtons.add(nextButton);
 		nextButtons.add(autocorrectButton);
 		nextButtons.add(prevButton);
@@ -144,32 +175,34 @@ public class Gui extends JPanel implements ActionListener{
 		nextButtons.add(prevFile);
 		nextButtons.add(viewOptions);
 		nextButtons.add(viewCompletedText);
-		
+		nextButtons.add(reset);
+
+
 		buttonsAndStuffPanel.setLayout(new BorderLayout());
 		buttonsAndStuffPanel.add(nextButtons, BorderLayout.PAGE_START);
 		buttonsAndStuffPanel.add(buttonScroll, BorderLayout.CENTER);
 		buttonsAndStuffPanel.add(numFilesLeft, BorderLayout.PAGE_END);
-		
+
 		this.add(currentMisspelledWord, BorderLayout.PAGE_START);
-		this.add(jScroll, BorderLayout.WEST);
-		this.add(buttonsAndStuffPanel, BorderLayout.CENTER);
+		this.add(jScroll, BorderLayout.CENTER);
+		this.add(buttonsAndStuffPanel, BorderLayout.EAST);
 
 		f.add(this);
+		f.pack();
 		f.setVisible(true);
-		
+
 		//==Setting up the ticking timer==//
 		Timer t = new Timer(34, (ActionListener) this);
 		t.start();
 	}
-	
+
 	public static void main(String args[]) {
-		numFiles = args.length;
 		if(args.length == 0) {
 			System.err.println("Error: Not enough Arguments");
 			System.out.println("Usage: noppes-spellcheck.jar <json file1> <json file2> ... <json fileN> [-q] [-h]\n -q: set if the file is a quest file\n -h prints this help\nProtip - this tool works best with bash scripting.");
 			System.exit(-1);
 		}
-		
+
 		for(String s : args) {
 			if (s.equalsIgnoreCase("-h")) {
 				System.out.println("Usage: noppes-spellcheck.jar <json file> [-q] [-h]\n -q: set if the file is a quest file\n -h prints this help\nProtip - this tool works best with bash scripting.");
@@ -180,9 +213,9 @@ public class Gui extends JPanel implements ActionListener{
 			}else if(s.equalsIgnoreCase("-d")){
 				debug = true;
 			}
-			
+
 			fileList = new ArrayList<File>();
-			
+
 			for(String f : args) {
 				if(debug) System.out.println("Current file:" + f);
 				if(!f.equals("-q") && !f.equals("-d")) {
@@ -191,60 +224,90 @@ public class Gui extends JPanel implements ActionListener{
 						if(!newFile.exists()) System.err.println("ERROR: JSON file does not exist.");
 						else System.err.println("ERROR: JSON file not read/writeable, exiting.");
 						System.exit(-1);
-						}
+					}
 					else {fileList.add(newFile);}
 				}
 			}
 
 		}
-		
+
 		try {
-		Gui g = new Gui(new File(args[0]));
-		g.numFilesLeft.setText(g.currentFileNum + "/" + numFiles);
-		
-		if(isQuest) g.viewOptions.setEnabled(false);
-		else g.viewCompletedText.setEnabled(false);
+			Gui g = new Gui(new File(args[0]));
+			g.numFilesLeft.setText(g.currentFileNum + "/" + fileList.size());
+			System.out.println(g.dataE.getOptionMisspelledWords().size());
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	//====Public Methods====//
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if(currentFileNum == 1) prevFile.setEnabled(false);
-		if(currentFileNum == numFiles) nextFile.setEnabled(false);
+		if(currentFileNum == fileList.size()) nextFile.setEnabled(false);
+
+		if(arg0.getActionCommand() != null) {
+			if(arg0.getActionCommand().equals("options")) {
+				isOptions = !isOptions;
+				if(isOptions) {
+					this.remove(jScroll);
+					this.add(optionsPanel, BorderLayout.CENTER);
+					addButtons(0, true);
+				}else {
+					this.remove(optionsPanel);
+					this.add(jScroll, BorderLayout.CENTER);
+					addButtons(0, false);
+				}
+				this.revalidate();
+				repaint();
+			}
+		}
 	}
-	
+
 	//====Private Methods====//
-	private void addButtons(int index) {
+	private void addButtons(int index, boolean isOption) {
 		//==Remove previous buttons from the panel==//
 		for(Component c : autoCorrectButtonPanel.getComponents()) {
 			autoCorrectButtonPanel.remove(c);
 		}
-		
+
 		//==Setup==//
 		autocorrectOptions = new ButtonGroup(); //Clear the button group
-		StringTokenizer st = new StringTokenizer(dataE.getCorrections().get(index), " "); //Create a string tokenizer to run through the corrections
+		StringTokenizer st;
+		if(isOption) st = new StringTokenizer(dataE.getOptionCorrections().get(index), " ");
+		else st = new StringTokenizer(dataE.getCorrections().get(index), " "); //Create a string tokenizer to run through the corrections
 		autoCorrectButtonPanel.setLayout(new GridLayout(st.countTokens(), 1)); // set up the layout for the panel. 
-		
+
 		//==Adding buttons==//
 		while(st.hasMoreTokens()) {
 			JRadioButton jb = new JRadioButton(st.nextToken());
 			String jbString = jb.getText();
 			jb.addActionListener(new ActionListener() {
-				
+
 				@Override
 				public void actionPerformed(ActionEvent arg0) {					
-					jText.setText(dataE.getDialougeText());
-					currentMisspelledWord.setText(jbString);
-					jText.setText(jText.getText().replace(dataE.getWords().get(currentIndexOfWord), jbString));
-
+					if(isOptions) {
+						JTextField jtext = (JTextField) optionsPanel.getComponent(optionsIndex);
+						jtext.setText(jbString);
+						currentMisspelledWord.setText(jbString);
+					}else {
+						jText.setText(dataE.getDialougeText());
+						currentMisspelledWord.setText(jbString);
+						jText.setText(jText.getText().replace(dataE.getWords().get(currentIndexOfWord), jbString));
+					}
 				}
 			});
 			autocorrectOptions.add(jb);
 			autoCorrectButtonPanel.add(jb);
 			autoCorrectButtonPanel.revalidate();
+		}
+	}
+	private void addOptions(JPanel j) {
+		j.setLayout(new GridLayout(dataE.getDialougeOptionTitles().size(), 1));
+		for(String s : dataE.getDialougeOptionTitles()) {
+			JTextField jTemp = new JTextField(s);
+			jTemp.setEditable(true);
+			j.add(jTemp);
 		}
 	}
 }

@@ -78,6 +78,7 @@ def writeFile(file):
 			mispelledWordsFile.write("----\n")
 			CorrectionsFile.write("----\n")
 			mispelledWordsFile.write(wordsToWrite[i] + "\n")
+			print("DEBUG: RECCOMENDED FIX:" + ", ".join(reccomendedFix[i]))
 			for word in reccomendedFix[i]:
 				CorrectionsFile.write(word + "\n")
 			i += 1
@@ -99,6 +100,7 @@ def spellcheck(s):
 			word = removePunctuation(list(word))
 			
 			if word not in spell:
+				print("Word " + word + " not in spell.")
 				word = addPunctuation(list(word))
 				needToFormat = False
 				if(word[0].isupper()):
@@ -108,6 +110,7 @@ def spellcheck(s):
 				
 				SubFix = []
 				for sbs in spell.candidates(word):
+					print("Spell suggustion:" + sbs)
 					if needToFormat:
 						if(word.isupper()): SubFix.append(sbs.upper())
 						else: SubFix.append(MakeUpper(list(sbs)))
@@ -152,7 +155,6 @@ def removePunctuation(s):
 	for p in punctuationObjects:
 		s.remove(p.punctuationLetter)
 	s = "".join(s)
-	if debug: print("DEBUG: Removed String:" + s)
 	return s
 
 def addPunctuation(s):
@@ -160,7 +162,6 @@ def addPunctuation(s):
 	for i in punctuationObjects:
 		s.insert(i.position, i.punctuationLetter)
 	s = "".join(s)
-	print("Returned word:" + s)
 	return s
 	
 class punctuationObject:

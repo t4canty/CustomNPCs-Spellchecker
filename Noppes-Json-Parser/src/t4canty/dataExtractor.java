@@ -98,6 +98,7 @@ public class dataExtractor {
 			Json tmp = j.get("Options");
 			for(Json e : tmp.getList()) {
 				dialougeOptions.add(e.get("Option"));
+				dialougeOptionTitles.add(e.get("Option").get("Title").toString());
 			}
 		}
 		if(debug) System.out.println("Dtext:" + dialougeText);
@@ -213,7 +214,7 @@ public class dataExtractor {
 			misspelledWords.add(st.nextToken());
 		}
 
-		pOutput = readIndividualKey(new File(path + "/misspelledWords.txt"));
+		pOutput = readIndividualKey(new File(path + "/other_misspelledWords.txt"));
 		st = new StringTokenizer(pOutput, "----");
 		while(st.hasMoreTokens()) {
 			optionMisspelledWords.add(st.nextToken());
