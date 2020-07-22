@@ -5,20 +5,17 @@ from string import punctuation
 from os import path
 
 wordsToWrite = []
-positionOfWords = []
 reccomendedFix = []
 s = []
 punctuationObjects = []
 debug = False
 hasOther = False
 
-newline = []
 
 def main():
 	global debug
 	global wordsToWrite
 	global reccomendedFix
-	global positionOfWords
 	global hasOther
 	if len(sys.argv) == 1:
 		print("Usage: spellchecker.py <file> <optionsFile>\n NOTE: this tool is not meant to be used by itself - try using json-parser.jar instead.")
@@ -49,7 +46,6 @@ def main():
 		s.clear()
 		s = readFile(sys.argv[2])
 		wordsToWrite.clear()
-		positionOfWords.clear()
 		reccomendedFix.clear()
 		spellcheck(s)
 		writeFile("other_")
@@ -60,63 +56,45 @@ def readFile(file):
 	if debug: print("DEBUG: READING FILE")
 	with open(file) as f:
 		s = f.read()
-		if debug: print("-------DEBUG-------\n" + s) 	
-		c = 0;
-		for char in s:
-			if char == "\n":
-				newline.append(c)
-			c += 1
+		if debug: print("-------DEBUG-------\n" + s)
 		return s.split()
 
 def writeFile(file):
 	global debug
 	global wordsToWrite
 	global reccomendedFix
-	global positionOfWords
 	global s	
 	
 	if debug: 
 		print("DEBUG: WRITING FILE")
 		print("DEBUG: WORDSTOWRITE:" + ", ".join(wordsToWrite))
-	
-	posFile = open(file + "wordPosition.txt", "w")
 	CorrectionsFile = open(file + "correctionsFile.txt", "w")
 	mispelledWordsFile = open(file + "misspelledWords.txt", "w")
-	posFile.write("")
 	CorrectionsFile.write("")
 	mispelledWordsFile.write("")
 	if not len(wordsToWrite) == 0:
-		
 		i = 0
 		for i in range(0, len(wordsToWrite)):
 			mispelledWordsFile.write("----\n")
-			posFile.write("----\n")
 			CorrectionsFile.write("----\n")
 			mispelledWordsFile.write(wordsToWrite[i] + "\n")
-			posFile.write(str(positionOfWords[i]) + "\n")
 			for word in reccomendedFix[i]:
 				CorrectionsFile.write(word + "\n")
 			i += 1
-	posFile.close()
 	CorrectionsFile.close()
 	mispelledWordsFile.close()
 
 def spellcheck(s):
 	global wordsToWrite
 	global reccomendedFix
-	global positionOfWords
 	global autoCorrected
 	global debug
 	global newline
 	if debug: print("DEBUG:SPELLCHECKING FILE")
     
 	spell = SpellChecker()
-	c = 0
-	newlineIndex = 0
-	print("Newlines:" + str(newline))
 	for word in s:
 		if word != "----":
-			print("Current C:" + str(c))
 			wordLength = len(word)
 			word = removePunctuation(list(word))
 			
@@ -127,8 +105,6 @@ def spellcheck(s):
 					needToFormat = True
 				
 				wordsToWrite.append(word)
-				print("Added word pos at" + str(c))
-				positionOfWords.append(c)
 				
 				SubFix = []
 				for sbs in spell.candidates(word):
@@ -139,11 +115,6 @@ def spellcheck(s):
 						SubFix.append(sbs)
 				
 				reccomendedFix.append(SubFix)
-			c += wordLength + 1
-			if(c >= newline[newlineIndex]):
-				c += 1
-				newlineIndex += 1
-				print("Added a newline at " + str(c))	
 
 def getStringFormat(s):
 	cases = []

@@ -33,10 +33,8 @@ public class dataExtractor {
 	private ArrayList<String> dialougeOptionTitles;
 	private ArrayList<String> Corrections = new ArrayList<String>();
 	private ArrayList<String> misspelledWords = new ArrayList<String>();
-	private ArrayList<Integer> wordPositions = new ArrayList<Integer>();
 	private ArrayList<String> optionCorrections = new ArrayList<String>();
 	private ArrayList<String> optionMisspelledWords = new ArrayList<String>();
-	private ArrayList<Integer> optionWordPositions = new ArrayList<Integer>();
 	private static boolean isQuest = false;
 	private boolean debug = false;
 
@@ -58,6 +56,7 @@ public class dataExtractor {
 			dialougeOptions = new ArrayList<Json>(); 
 			dialougeOptionTitles = new ArrayList<String>();
 		}
+		
 
 		//==Reading and writing keys==//
 		readKeys(j, isQuest);
@@ -66,11 +65,6 @@ public class dataExtractor {
 			System.out.println("DEBUG: Misspelled words");
 			for(String s : misspelledWords) {
 				System.out.println(s);
-			}
-
-			System.out.println("DEBUG : Word Positions");
-			for(int i : wordPositions) {
-				System.out.println(i);
 			}
 			System.out.println("DEBUG : Word corrections");
 			for(String s2 : Corrections) {
@@ -225,19 +219,6 @@ public class dataExtractor {
 			optionMisspelledWords.add(st.nextToken());
 		}
 
-		//Positions file
-		pOutput = readIndividualKey(new File(path + "/wordPosition.txt"));
-		st = new StringTokenizer(pOutput, "----");
-		while(st.hasMoreTokens()) {
-			wordPositions.add(Integer.parseInt(st.nextToken()));
-		}
-
-		pOutput = readIndividualKey(new File(path + "/other_wordPosition.txt"));
-		st = new StringTokenizer(pOutput, "----");
-		while(st.hasMoreTokens()) {
-			optionWordPositions.add(Integer.parseInt(st.nextToken()));
-		}
-
 	}
 
 	private String readIndividualKey(File f) throws IOException {
@@ -269,7 +250,6 @@ public class dataExtractor {
 
 	//====Getters/Setters====//
 	public ArrayList<String> getCorrections(){return Corrections;}
-	public ArrayList<Integer> getWordPositions(){return wordPositions;}
 	public ArrayList<String> getWords(){return misspelledWords;}
 	public String getDialougeText() {return dialougeText;}
 	public ArrayList<Json> getDialougeOptions() { return dialougeOptions;}
@@ -283,5 +263,4 @@ public class dataExtractor {
 	public void setQuestText(String questText) {this.questText = questText;}
 	public ArrayList<String> getOptionCorrections() {return optionCorrections;}
 	public ArrayList<String> getOptionMisspelledWords() {return optionMisspelledWords;}
-	public ArrayList<Integer> getOptionWordPositions() {return optionWordPositions;}
 }

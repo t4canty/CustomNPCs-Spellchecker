@@ -237,11 +237,9 @@ public class Gui extends JPanel implements ActionListener{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {					
 					jText.setText(dataE.getDialougeText());
-					System.out.println(dataE.getDialougeText().length());
 					currentMisspelledWord.setText(jbString);
-					String replacedText = jText.getText().substring(0, dataE.getWordPositions().get(currentIndexOfWord)) + jbString + jText.getText().substring(dataE.getWordPositions().get(currentIndexOfWord) + dataE.getWords().get(currentIndexOfWord).length());
-					jText.setText(replacedText);
-					System.out.println(replacedText.length());
+					jText.setText(jText.getText().replace(dataE.getWords().get(currentIndexOfWord), jbString));
+
 				}
 			});
 			autocorrectOptions.add(jb);
