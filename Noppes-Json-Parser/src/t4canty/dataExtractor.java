@@ -94,7 +94,7 @@ public class dataExtractor {
 
 		//==Now write temp files for the python process==//
 		if(!isQuest) {
-			if(!(dialougeText.equals(""))) writeTempKeys(false);
+			if(!(dialougeText.isEmpty())) writeTempKeys(false);
 			if(!(dialougeOptions.size() == 0)) writeTempKeys(true);
 		}else {
 			if(!(questText.isEmpty())) writeTempKeys(false);
@@ -187,7 +187,10 @@ public class dataExtractor {
 		}
 
 		//==Make sure python returns a non-error code==//
-		assert p.waitFor() == 0 : "Error - python returned with error code.";
+		if(p.waitFor() != 0) { 
+			System.out.println("Error - python returned with error code.\nExiting"); 
+			System.exit(-1);
+		}
 
 		//==Read python data and parse into java==//
 		//Corrections file

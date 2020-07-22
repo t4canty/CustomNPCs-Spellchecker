@@ -113,42 +113,14 @@ public class Gui extends JPanel implements ActionListener{
 		addButtons(currentIndexOfWord, false); //adds correction suggestions on the side menu.
 
 		//==Setting up ActionListeners==//
-		editButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {jText.setEditable(!jText.isEditable());}
-		});
-
-		nextButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if(isOptions) {
-					if(optionsIndex < dataE.getOptionMisspelledWords().size() -1) optionsIndex++;
-					else optionsIndex = 0;
-					currentMisspelledWord.setText(dataE.getDialougeOptionTitles().get(optionsIndex));
-					addButtons(optionsIndex, true);
-				}
-				else{
-					if(currentIndexOfWord < dataE.getWords().size() -1) currentIndexOfWord++;
-					else currentIndexOfWord = 0;
-					currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
-					addButtons(currentIndexOfWord, false);
-				}
-			}
-		});
-
-		prevButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if(currentIndexOfWord > 0) currentIndexOfWord--;
-				else currentIndexOfWord = dataE.getWords().size() -1;
-				currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
-				addButtons(currentIndexOfWord, false);
-			}
-		});
-
+		editButton.addActionListener(this);
+		nextButton.addActionListener(this);
+		prevButton.addActionListener(this);
 		viewOptions.addActionListener(this);
 		reset.addActionListener(this);
+		editButton.setActionCommand("edit");
+		nextButton.setActionCommand("next");
+		prevButton.setActionCommand("prev");
 		viewOptions.setActionCommand("options");
 		reset.setActionCommand("reset");
 
@@ -224,8 +196,8 @@ public class Gui extends JPanel implements ActionListener{
 			fileList = new ArrayList<File>();
 
 			for(String f : args) {
-				if(debug) System.out.println("Current file:" + f);
 				if(!f.equals("-q") && !f.equals("-d")) {
+					if(debug) System.out.println("Current file:" + f);
 					File newFile = new File(f);
 					if(!newFile.exists() || !newFile.canWrite() || !newFile.canRead()) { 
 						if(!newFile.exists()) System.err.println("ERROR: JSON file does not exist.");
@@ -282,6 +254,37 @@ public class Gui extends JPanel implements ActionListener{
 					jText.setText(dataE.getDialougeText());
 				}
 				break;
+			case "edit":
+				jText.setEditable(!jText.isEditable());
+				break;
+			case "prev":
+				if(isOptions) {
+					if(optionsIndex > 0 ) optionsIndex--;
+					else optionsIndex = dataE.getOptionMisspelledWords().size() -1;
+					currentMisspelledWord.setText(dataE.getDialougeOptionTitles().get(optionsIndex));
+					addButtons(optionsIndex, true);
+				}else {
+					if(currentIndexOfWord > 0) currentIndexOfWord--;
+					else currentIndexOfWord = dataE.getWords().size() -1;
+					currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
+					addButtons(currentIndexOfWord, false);
+				}
+				
+				break;
+			case "next":
+				if(isOptions) {
+					if(optionsIndex < dataE.getOptionMisspelledWords().size() -1) optionsIndex++;
+					else optionsIndex = 0;
+					currentMisspelledWord.setText(dataE.getDialougeOptionTitles().get(optionsIndex));
+					addButtons(optionsIndex, true);
+				}
+				else{
+					if(currentIndexOfWord < dataE.getWords().size() -1) currentIndexOfWord++;
+					else currentIndexOfWord = 0;
+					currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
+					addButtons(currentIndexOfWord, false);
+				}
+				break;	
 			}
 		}
 	}

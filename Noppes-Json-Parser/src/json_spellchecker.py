@@ -100,8 +100,8 @@ def spellcheck(s):
 			word = removePunctuation(list(word))
 			
 			if word not in spell:
-				print("Word " + word + " not in spell.")
 				word = addPunctuation(list(word))
+				print("Word " + word + " not in spell.")
 				needToFormat = False
 				if(word[0].isupper()):
 					needToFormat = True
