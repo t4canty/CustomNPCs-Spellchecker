@@ -22,6 +22,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Timer;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import Noppes.Json.JsonException;
 
@@ -70,6 +72,8 @@ public class Gui extends JPanel implements ActionListener{
 		f.setTitle("CustomNPCs spellchecker");
 		f.setSize(new Dimension(800, 559));
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException| UnsupportedLookAndFeelException e) {e.printStackTrace();}
 
 		this.setLayout(new BorderLayout());
 
