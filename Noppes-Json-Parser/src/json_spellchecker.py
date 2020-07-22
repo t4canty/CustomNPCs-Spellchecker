@@ -110,7 +110,6 @@ def spellcheck(s):
 				
 				SubFix = []
 				for sbs in spell.candidates(word):
-					print("Spell suggustion:" + sbs)
 					if needToFormat:
 						if(word.isupper()): SubFix.append(sbs.upper())
 						else: SubFix.append(MakeUpper(list(sbs)))

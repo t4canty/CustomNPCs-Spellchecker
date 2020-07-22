@@ -39,7 +39,7 @@ public class Gui extends JPanel implements ActionListener{
 	private int optionsIndex = 0;
 	private boolean isOptions = false;
 	private ButtonGroup autocorrectOptions;
-	private JButton autocorrectButton;
+	private JButton editButton;
 	private JButton nextButton;
 	private JButton viewOptions;
 	private JButton viewCompletedText;
@@ -93,7 +93,7 @@ public class Gui extends JPanel implements ActionListener{
 		viewOptions = new JButton("Options");
 		viewCompletedText = new JButton("Completed Text");
 		nextButton = new JButton("next");
-		autocorrectButton = new JButton("edit");
+		editButton = new JButton("edit");
 		prevButton = new JButton("previous");
 		saveButton = new JButton("save");
 		nextFile = new JButton("Next File");;
@@ -109,7 +109,7 @@ public class Gui extends JPanel implements ActionListener{
 		addButtons(currentIndexOfWord, false); //adds correction suggestions on the side menu.
 
 		//==Setting up ActionListeners==//
-		autocorrectButton.addActionListener(new ActionListener() {
+		editButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {jText.setEditable(!jText.isEditable());}
 		});
@@ -144,7 +144,10 @@ public class Gui extends JPanel implements ActionListener{
 		});
 
 		viewOptions.addActionListener(this);
+		reset.addActionListener(this);
 		viewOptions.setActionCommand("options");
+		reset.setActionCommand("reset");
+
 
 		if(isQuest) { 
 			viewOptions.setEnabled(false);
@@ -158,7 +161,7 @@ public class Gui extends JPanel implements ActionListener{
 				viewOptions.setEnabled(false);
 			}
 		}
-		
+
 		//==Setting up component options==//
 		jScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		jScroll.setPreferredSize(new Dimension(500, 500));
@@ -168,7 +171,7 @@ public class Gui extends JPanel implements ActionListener{
 
 		nextButtons.setLayout(new GridLayout(5, 2));
 		nextButtons.add(nextButton);
-		nextButtons.add(autocorrectButton);
+		nextButtons.add(editButton);
 		nextButtons.add(prevButton);
 		nextButtons.add(saveButton);
 		nextButtons.add(nextFile);
@@ -234,7 +237,6 @@ public class Gui extends JPanel implements ActionListener{
 		try {
 			Gui g = new Gui(new File(args[0]));
 			g.numFilesLeft.setText(g.currentFileNum + "/" + fileList.size());
-			System.out.println(g.dataE.getOptionMisspelledWords().size());
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -247,19 +249,35 @@ public class Gui extends JPanel implements ActionListener{
 		if(currentFileNum == fileList.size()) nextFile.setEnabled(false);
 
 		if(arg0.getActionCommand() != null) {
-			if(arg0.getActionCommand().equals("options")) {
+			switch(arg0.getActionCommand()) {
+			case "options":
 				isOptions = !isOptions;
 				if(isOptions) {
 					this.remove(jScroll);
 					this.add(optionsPanel, BorderLayout.CENTER);
 					addButtons(0, true);
+					editButton.setEnabled(false);
 				}else {
 					this.remove(optionsPanel);
 					this.add(jScroll, BorderLayout.CENTER);
 					addButtons(0, false);
+					editButton.setEnabled(true);
 				}
 				this.revalidate();
 				repaint();
+				break;
+			case "reset":
+				if(isOptions) {
+					int count = 0;
+					for(Component c : optionsPanel.getComponents()) {
+						JTextField jt = (JTextField) c;
+						jt.setText(dataE.getDialougeOptionTitles().get(count));
+						count++;
+					}
+				}else {
+					jText.setText(dataE.getDialougeText());
+				}
+				break;
 			}
 		}
 	}

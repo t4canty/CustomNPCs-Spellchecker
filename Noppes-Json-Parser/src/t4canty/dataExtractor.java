@@ -61,17 +61,6 @@ public class dataExtractor {
 		//==Reading and writing keys==//
 		readKeys(j, isQuest);
 
-		if(debug) {
-			System.out.println("DEBUG: Misspelled words");
-			for(String s : misspelledWords) {
-				System.out.println(s);
-			}
-			System.out.println("DEBUG : Word corrections");
-			for(String s2 : Corrections) {
-				System.out.println(s2);
-			}
-		}
-
 		//==Writing Keys==//
 		//writeKeys();
 	}
@@ -113,8 +102,6 @@ public class dataExtractor {
 		}
 
 		readTempkeys();
-		System.out.println(dialougeText);
-		System.out.println(dialougeText.length());
 	}
 
 	/**
