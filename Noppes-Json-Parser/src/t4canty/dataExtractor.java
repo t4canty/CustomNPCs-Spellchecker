@@ -34,6 +34,9 @@ public class dataExtractor {
 	private ArrayList<String> Corrections = new ArrayList<String>();
 	private ArrayList<String> misspelledWords = new ArrayList<String>();
 	private ArrayList<Integer> wordPositions = new ArrayList<Integer>();
+	private ArrayList<String> optionCorrections = new ArrayList<String>();
+	private ArrayList<String> optionMisspelledWords = new ArrayList<String>();
+	private ArrayList<Integer> optionWordPositions = new ArrayList<Integer>();
 	private static boolean isQuest = false;
 	private boolean debug = false;
 
@@ -106,8 +109,17 @@ public class dataExtractor {
 		if(debug) System.out.println("Dtext:" + dialougeText);
 
 		//==Now write temp files for the python process==//
-		writeTempKeys();
+		if(!isQuest) {
+			if(!(dialougeText.equals(""))) writeTempKeys(false);
+			if(!(dialougeOptions.size() == 0)) writeTempKeys(true);
+		}else {
+			if(!(questText.isEmpty())) writeTempKeys(false);
+			if(!(questComplete.isEmpty())) writeTempKeys(true);
+		}
+
 		readTempkeys();
+		System.out.println(dialougeText);
+		System.out.println(dialougeText.length());
 	}
 
 	/**
@@ -133,42 +145,53 @@ public class dataExtractor {
 	public void writeKeys(String dialougeText, ArrayList<String> DialougeOptions, File f) throws IOException {
 		j.put("DialogText", dialougeText);
 		int c = 0;
-//		Json tmp = j.get("Options");
-//		for (Json t : tmp.getList()) {
-//			Json t2 = t.get("Option");
-//			t2.put("Title", dialougeOptions.get(0));
-//			
-//		}
+		//		Json tmp = j.get("Options");
+		//		for (Json t : tmp.getList()) {
+		//			Json t2 = t.get("Option");
+		//			t2.put("Title", dialougeOptions.get(0));
+		//			
+		//		}
 		j.save(f);
 	}
 
 	//====Private Methods==//
-	private void writeTempKeys() throws IOException{
+	private void writeTempKeys(boolean isOther) throws IOException{
 		//==Quest writing==//
 		if(isQuest) {
-			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/tmp.txt")), StandardCharsets.UTF_8);
-			writer.write(questText + "\n");
-			writer.write("----\n");
-			writer.write(questComplete);
-			writer.close();
+			if(isOther) {
+				OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/questText.txt")), StandardCharsets.UTF_8);
+				writer.write(questText + "\n");
+				writer.close();
+			}else {
+				OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/questComplete.txt")), StandardCharsets.UTF_8);
+				writer.write(questComplete + "\n");
+				writer.close();
+			}
 		}
 
 		//==Dialouge writing==//
 		else {
-			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/tmp.txt")), StandardCharsets.UTF_8);
-			writer.write(dialougeText + "\n");
-			writer.write("----\n");
-			for(Json j : dialougeOptions) {
-				writer.write(j.get("Title").toString() + "\n");
-				writer.write("----\n");
+			if(isOther) {
+				OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/DialougeOptions.txt")), StandardCharsets.UTF_8);
+				for(Json j : dialougeOptions) {
+					writer.write(j.get("Title").toString() + "\n");
+					writer.write("----\n");
+				}
+				writer.close();
+			}else {
+				OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(new File(path +"/DialougeText.txt")), StandardCharsets.UTF_8);
+				writer.write(dialougeText + "\n");
+				writer.close();
 			}
-			writer.close();
 		}
 	}
 
 	private void readTempkeys() throws IOException, InterruptedException {
 		//==Build python subprocess==//
-		ProcessBuilder pb = new ProcessBuilder("python3", path + "//src//json_spellchecker.py", path +"/tmp.txt", "-d");
+		ProcessBuilder pb;
+		String isDebug = (debug == true) ? "-d" : "";
+		if(isQuest) pb = new ProcessBuilder("python3", path + "//src//json_spellchecker.py", path +"/questText.txt", path +"/questComplete.txt", isDebug);
+		else pb = new ProcessBuilder("python3", path + "//src//json_spellchecker.py", path +"/DialougeText.txt", path +"/DialougeOptions.txt", "-d");
 		pb.redirectErrorStream(true);
 		Process p = pb.start();
 
@@ -186,23 +209,20 @@ public class dataExtractor {
 
 		//==Read python data and parse into java==//
 		//Corrections file
-		String pOutput = "";
-		line = "";
-		BufferedReader b2f = new BufferedReader(new FileReader(new File(path + "/correctionsFile.txt")));
-		while((line = b2f.readLine()) != null) {
-			pOutput += line + " ";
-		}
-		b2f.close();
-		StringTokenizer st = new StringTokenizer(pOutput, "----");
-		while(st.hasMoreTokens()) {
-			Corrections.add(st.nextToken().trim());
-		}
+		Corrections = readCorrections(new File(path + "/correctionsFile.txt"));
+		optionCorrections = readCorrections(new File(path + "/other_correctionsFile.txt"));
 
 		//Words file
+		String pOutput = readIndividualKey(new File(path + "/misspelledWords.txt"));
+		StringTokenizer st = new StringTokenizer(pOutput, "----");
+		while(st.hasMoreTokens()) {
+			misspelledWords.add(st.nextToken());
+		}
+
 		pOutput = readIndividualKey(new File(path + "/misspelledWords.txt"));
 		st = new StringTokenizer(pOutput, "----");
 		while(st.hasMoreTokens()) {
-			misspelledWords.add(st.nextToken());
+			optionMisspelledWords.add(st.nextToken());
 		}
 
 		//Positions file
@@ -210,6 +230,12 @@ public class dataExtractor {
 		st = new StringTokenizer(pOutput, "----");
 		while(st.hasMoreTokens()) {
 			wordPositions.add(Integer.parseInt(st.nextToken()));
+		}
+
+		pOutput = readIndividualKey(new File(path + "/other_wordPosition.txt"));
+		st = new StringTokenizer(pOutput, "----");
+		while(st.hasMoreTokens()) {
+			optionWordPositions.add(Integer.parseInt(st.nextToken()));
 		}
 
 	}
@@ -223,6 +249,22 @@ public class dataExtractor {
 		}
 		b2f.close();
 		return pOutput;
+	}
+
+	private ArrayList<String> readCorrections(File f) throws IOException {
+		String pOutput = "";
+		String line = "";
+		ArrayList<String> tempCorrrections = new ArrayList<String>();
+		BufferedReader b2f = new BufferedReader(new FileReader(f));
+		while((line = b2f.readLine()) != null) {
+			pOutput += line + " ";
+		}
+		b2f.close();
+		StringTokenizer st = new StringTokenizer(pOutput, "----");
+		while(st.hasMoreTokens()) {
+			tempCorrrections.add(st.nextToken().trim());
+		}
+		return tempCorrrections;
 	}
 
 	//====Getters/Setters====//
@@ -239,4 +281,7 @@ public class dataExtractor {
 	public void setDialougeOptionTitles(ArrayList<String> dialougeOptionTitles) {this.dialougeOptionTitles = dialougeOptionTitles;}
 	public void setQuestComplete(String questComplete) {this.questComplete = questComplete;}
 	public void setQuestText(String questText) {this.questText = questText;}
+	public ArrayList<String> getOptionCorrections() {return optionCorrections;}
+	public ArrayList<String> getOptionMisspelledWords() {return optionMisspelledWords;}
+	public ArrayList<Integer> getOptionWordPositions() {return optionWordPositions;}
 }

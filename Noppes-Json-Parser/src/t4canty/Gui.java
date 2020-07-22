@@ -184,9 +184,14 @@ public class Gui extends JPanel implements ActionListener{
 			fileList = new ArrayList<File>();
 			
 			for(String f : args) {
-				if(!f.equals("-q") || !f.equals("-d")) {
+				if(debug) System.out.println("Current file:" + f);
+				if(!f.equals("-q") && !f.equals("-d")) {
 					File newFile = new File(f);
-					if(!newFile.exists() || !newFile.canWrite() || !newFile.canRead()) { System.err.println("ERROR: JSON file not read/writeable, exiting."); System.exit(-1);}
+					if(!newFile.exists() || !newFile.canWrite() || !newFile.canRead()) { 
+						if(!newFile.exists()) System.err.println("ERROR: JSON file does not exist.");
+						else System.err.println("ERROR: JSON file not read/writeable, exiting.");
+						System.exit(-1);
+						}
 					else {fileList.add(newFile);}
 				}
 			}
@@ -232,12 +237,11 @@ public class Gui extends JPanel implements ActionListener{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {					
 					jText.setText(dataE.getDialougeText());
+					System.out.println(dataE.getDialougeText().length());
 					currentMisspelledWord.setText(jbString);
-					String replacedText = jText.getText().substring(0, 
-							dataE.getWordPositions().get(currentIndexOfWord)) + jbString 
-							+ jText.getText().substring(
-									dataE.getWordPositions().get(currentIndexOfWord) + dataE.getWords().get(currentIndexOfWord).length());
+					String replacedText = jText.getText().substring(0, dataE.getWordPositions().get(currentIndexOfWord)) + jbString + jText.getText().substring(dataE.getWordPositions().get(currentIndexOfWord) + dataE.getWords().get(currentIndexOfWord).length());
 					jText.setText(replacedText);
+					System.out.println(replacedText.length());
 				}
 			});
 			autocorrectOptions.add(jb);
