@@ -7,7 +7,7 @@ from os import path
 wordsToWrite = []
 reccomendedFix = []
 s = []
-punctuationObjects = []
+nums = []
 debug = False
 hasOther = False
 
@@ -17,6 +17,7 @@ def main():
 	global wordsToWrite
 	global reccomendedFix
 	global hasOther
+	global nums
 	if len(sys.argv) == 1:
 		print("Usage: spellchecker.py <file> <optionsFile>\n NOTE: this tool is not meant to be used by itself - try using json-parser.jar instead.")
 		sys.exit(-1)
@@ -36,6 +37,9 @@ def main():
 		if not path.exists(sys.argv[2]) and hasOther:
 			print("ERROR: System cannot find the options file.")
 			sys.exit(-1)
+	
+	for n in range(0,9):
+		nums.append(str(n))
 	
 	s = readFile(sys.argv[1])
 	print("DEBUG: Returned s" + str(s))
@@ -64,7 +68,7 @@ def writeFile(file):
 	global wordsToWrite
 	global reccomendedFix
 	global s	
-	
+
 	if debug: 
 		print("DEBUG: WRITING FILE")
 		print("DEBUG: WORDSTOWRITE:" + ", ".join(wordsToWrite))
@@ -88,35 +92,39 @@ def writeFile(file):
 def spellcheck(s):
 	global wordsToWrite
 	global reccomendedFix
-	global autoCorrected
 	global debug
 	global newline
-	if debug: print("DEBUG:SPELLCHECKING FILE")
-    
+	global nums
+	if debug: 
+		print("DEBUG:SPELLCHECKING FILE")
+	
 	spell = SpellChecker()
 	for word in s:
 		if word != "----":
-			wordLength = len(word)
 			word = removePunctuation(list(word))
-			
-			if word not in spell:
-				word = addPunctuation(list(word))
-				print("Word " + word + " not in spell.")
-				needToFormat = False
-				if(word[0].isupper()):
-					needToFormat = True
-				
-				wordsToWrite.append(word)
-				
-				SubFix = []
-				for sbs in spell.candidates(word):
-					if needToFormat:
-						if(word.isupper()): SubFix.append(sbs.upper())
-						else: SubFix.append(MakeUpper(list(sbs)))
-					else:
-						SubFix.append(sbs)
-				
-				reccomendedFix.append(SubFix)
+			isNotNum = True
+			for c in word:
+				if c in nums:
+					isNotNum = False
+					break
+			if isNotNum and len(word) != 0:
+				if word not in spell:
+					needToFormat = False
+					if(word[0].isupper()):
+						needToFormat = True
+					print("Word " + word + " not in spell.")
+					
+					wordsToWrite.append(word)
+					
+					SubFix = []
+					for sbs in spell.candidates(word):
+						if needToFormat:
+							if(word.isupper()): SubFix.append(sbs.upper())
+							else: SubFix.append(MakeUpper(list(sbs)))
+						else:
+							SubFix.append(sbs)
+					
+					reccomendedFix.append(SubFix)
 
 def getStringFormat(s):
 	cases = []
@@ -139,34 +147,20 @@ def formatString(s, cases):
 	return modS
 	
 def MakeUpper(s):
-	s[0].upper();
+	s[0] = s[0].upper();
 	return "".join(s)
 
 def removePunctuation(s):
 	global debug
-	global punctuationObjects
-	punctuationObjects.clear()
-	for i in range(0, len(s)):
-		#if debug :print("Checking letter" + str(i+1) + "/" + str(len(s)) + " : " + s[i])
-		if s[i] in punctuation:
-			punctuationObjects.append(punctuationObject(s[i], i)) 
-	
-	for p in punctuationObjects:
-		s.remove(p.punctuationLetter)
-	s = "".join(s)
-	return s
-
-def addPunctuation(s):
-	global punctuationObjects
-	for i in punctuationObjects:
-		s.insert(i.position, i.punctuationLetter)
+	remove = []
+	for c in s:
+		if(c in punctuation or c == " ") and c != "'":
+			remove.append(c)
+	for rs in remove:
+		s.remove(rs)
 	s = "".join(s)
 	return s
 	
-class punctuationObject:
-	def __init__(self, punctuationLetter, position):
-		self.punctuationLetter = punctuationLetter
-		self.position = position
 print("running python")
 main()
 

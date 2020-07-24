@@ -40,6 +40,7 @@ public class Gui extends JPanel implements ActionListener{
 	private int currentFileNum = 1;
 	private int optionsIndex = 0;
 	private boolean isOptions = false;
+	private String currentText;
 	private ButtonGroup autocorrectOptions;
 	private JButton editButton;
 	private JButton nextButton;
@@ -59,6 +60,7 @@ public class Gui extends JPanel implements ActionListener{
 	private JScrollPane jScroll;
 	private static ArrayList<File> fileList;
 	private dataExtractor dataE;
+	private boolean fixStuff = false;
 	/**
 	 * Constructor for the gui. 
 	 * @param file - the first JSON file to read from when constructing the object. 
@@ -91,7 +93,11 @@ public class Gui extends JPanel implements ActionListener{
 		jText.setLineWrap(true);
 		jText.setWrapStyleWord(true);
 
-		currentMisspelledWord = new JTextField( dataE.getWords().get(currentIndexOfWord));
+		if(dataE.getMisspelledWords().size() != 0)currentMisspelledWord = new JTextField( dataE.getMisspelledWords().get(currentIndexOfWord));
+		else { 
+			currentMisspelledWord = new JTextField();
+			currentMisspelledWord.setEnabled(false);
+		}
 		numFilesLeft = new JLabel();
 
 		viewOptions = new JButton("Options");
@@ -110,7 +116,7 @@ public class Gui extends JPanel implements ActionListener{
 		JScrollPane buttonScroll = new JScrollPane(autoCorrectButtonPanel);
 
 		addOptions(optionsPanel);
-		addButtons(currentIndexOfWord, false); //adds correction suggestions on the side menu.
+		if(dataE.getMisspelledWords().size() != 0) addButtons(currentIndexOfWord, false); //adds correction suggestions on the side menu.
 
 		//==Setting up ActionListeners==//
 		editButton.addActionListener(this);
@@ -130,14 +136,35 @@ public class Gui extends JPanel implements ActionListener{
 			if(dataE.getOptionMisspelledWords().size() == 0) {
 				viewCompletedText.setEnabled(false);
 			}
+			if(dataE.getMisspelledWords().size() == 0 && dataE.getOptionMisspelledWords().size() != 0) {
+				fixStuff = true;
+			}else if(dataE.getMisspelledWords().size() == 0 && dataE.getOptionMisspelledWords().size() == 0) {
+				editButton.setEnabled(false);
+				nextButton.setEnabled(false);
+				prevButton.setEnabled(false);
+				reset.setEnabled(false);
+				viewCompletedText.setEnabled(false);
+				saveButton.setEnabled(false);
+			}
 		}
 		else{
 			viewCompletedText.setEnabled(false);
 			if(dataE.getOptionMisspelledWords().size() == 0) {
 				viewOptions.setEnabled(false);
 			}
+			if(dataE.getMisspelledWords().size() == 0 && dataE.getOptionMisspelledWords().size() != 0) {
+				fixStuff = true;
+			}else if(dataE.getMisspelledWords().size() == 0 && dataE.getOptionMisspelledWords().size() == 0){
+				editButton.setEnabled(false);
+				nextButton.setEnabled(false);
+				prevButton.setEnabled(false);
+				reset.setEnabled(false);
+				viewCompletedText.setEnabled(false);
+				saveButton.setEnabled(false);
+			}
 		}
-
+		currentText = dataE.getDialougeText();
+		
 		//==Setting up component options==//
 		jScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		jScroll.setPreferredSize(new Dimension(500, 500));
@@ -223,7 +250,17 @@ public class Gui extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent arg0) {
 		if(currentFileNum == 1) prevFile.setEnabled(false);
 		if(currentFileNum == fileList.size()) nextFile.setEnabled(false);
-
+		if(fixStuff) {
+			isOptions = true;
+			viewOptions.setEnabled(false);
+			this.remove(jScroll);
+			this.add(optionsPanel, BorderLayout.CENTER);
+			addButtons(0, true);
+			editButton.setEnabled(false);
+			this.revalidate();
+			repaint();
+			fixStuff = false;
+		}
 		if(arg0.getActionCommand() != null) {
 			switch(arg0.getActionCommand()) {
 			case "options":
@@ -265,9 +302,10 @@ public class Gui extends JPanel implements ActionListener{
 					addButtons(optionsIndex, true);
 				}else {
 					if(currentIndexOfWord > 0) currentIndexOfWord--;
-					else currentIndexOfWord = dataE.getWords().size() -1;
-					currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
+					else currentIndexOfWord = dataE.getMisspelledWords().size() -1;
+					currentMisspelledWord.setText(dataE.getMisspelledWords().get(currentIndexOfWord));
 					addButtons(currentIndexOfWord, false);
+					currentText = jText.getText();
 				}
 				
 				break;
@@ -279,10 +317,11 @@ public class Gui extends JPanel implements ActionListener{
 					addButtons(optionsIndex, true);
 				}
 				else{
-					if(currentIndexOfWord < dataE.getWords().size() -1) currentIndexOfWord++;
+					if(currentIndexOfWord < dataE.getMisspelledWords().size() -1) currentIndexOfWord++;
 					else currentIndexOfWord = 0;
-					currentMisspelledWord.setText(dataE.getWords().get(currentIndexOfWord));
+					currentMisspelledWord.setText(dataE.getMisspelledWords().get(currentIndexOfWord));
 					addButtons(currentIndexOfWord, false);
+					currentText = jText.getText();
 				}
 				break;	
 			}
@@ -316,9 +355,9 @@ public class Gui extends JPanel implements ActionListener{
 						jtext.setText(jbString);
 						currentMisspelledWord.setText(jbString);
 					}else {
-						jText.setText(dataE.getDialougeText());
+						jText.setText(currentText);
 						currentMisspelledWord.setText(jbString);
-						jText.setText(jText.getText().replace(dataE.getWords().get(currentIndexOfWord), jbString));
+						jText.setText(jText.getText().replace(dataE.getMisspelledWords().get(currentIndexOfWord), jbString));
 					}
 				}
 			});

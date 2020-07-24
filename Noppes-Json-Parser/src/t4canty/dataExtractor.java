@@ -102,6 +102,16 @@ public class dataExtractor {
 		}
 
 		readTempkeys();
+		
+		//==Remove all duplicate entries==//
+		for(int i : removeDuplicates(misspelledWords)) {
+			misspelledWords.remove(i);
+			Corrections.remove(i);
+		}
+		for(int i2 : removeDuplicates(optionMisspelledWords)) {
+			optionMisspelledWords.remove(i2);
+			Corrections.remove(i2);
+		}
 	}
 
 	/**
@@ -238,10 +248,24 @@ public class dataExtractor {
 		}
 		return tempCorrrections;
 	}
+	
+	private ArrayList<Integer> removeDuplicates(ArrayList<String> list) {
+		ArrayList<Integer> remove = new ArrayList<Integer>();
+		for(int i = 0; i < list.size() -1; i++) {
+			for(int j = i + 1; j < list.size(); j++) {
+				if(list.get(i).equals(list.get(j))) {
+					remove.add(i);
+				}
+			}
+		}
+		System.out.println(remove.toString());
+		return remove;
+		
+	}
 
 	//====Getters/Setters====//
 	public ArrayList<String> getCorrections(){return Corrections;}
-	public ArrayList<String> getWords(){return misspelledWords;}
+	public ArrayList<String> getMisspelledWords(){return misspelledWords;}
 	public String getDialougeText() {return dialougeText;}
 	public ArrayList<Json> getDialougeOptions() { return dialougeOptions;}
 	public ArrayList<String> getDialougeOptionTitles() {return dialougeOptionTitles;}
